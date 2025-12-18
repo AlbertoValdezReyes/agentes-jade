@@ -34,6 +34,10 @@ public class ConfirmarCita implements AgentAction {
         return confirmada;
     }
 
+    public boolean getConfirmada() {
+        return confirmada;
+    }
+
     public void setConfirmada(boolean confirmada) {
         this.confirmada = confirmada;
     }

@@ -45,6 +45,10 @@ public class Paciente implements Concept {
         return diabetes;
     }
 
+    public boolean getDiabetes() {
+        return diabetes;
+    }
+
     public void setDiabetes(boolean diabetes) {
         this.diabetes = diabetes;
     }
