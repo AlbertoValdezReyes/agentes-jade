@@ -58,16 +58,30 @@ public class Ayudante extends Agent {
             String sender = msg.getSender().getLocalName();
             int performative = msg.getPerformative();
 
+            // Ignorar mensajes de agentes del sistema JADE
+            if (sender.equals("ams") || sender.equals("df") || sender.startsWith("rma")) {
+                return;
+            }
+
             // Verificar si tiene contenido estructurado
             if (msg.getLanguage() != null && msg.getLanguage().equals(codec.getName())) {
-                ContentElement ce = getContentManager().extractContent(msg);
+                // Debug: mostrar contenido del mensaje
+                System.out.println("[AYUDANTE] Mensaje de " + sender + " - Contenido: " + msg.getContent());
 
-                if (ce instanceof Agendar) {
-                    // Recibe instruccion del Fisioterapeuta para preparar sala
-                    procesarNuevaCita((Agendar) ce, msg);
-                } else if (ce instanceof EnviarDatosMedicos) {
-                    // Recibe datos medicos del Recepcionista
-                    procesarDatosMedicos((EnviarDatosMedicos) ce, msg);
+                try {
+                    ContentElement ce = getContentManager().extractContent(msg);
+
+                    if (ce instanceof Agendar) {
+                        // Recibe instruccion del Fisioterapeuta para preparar sala
+                        procesarNuevaCita((Agendar) ce, msg);
+                    } else if (ce instanceof EnviarDatosMedicos) {
+                        // Recibe datos medicos del Recepcionista
+                        procesarDatosMedicos((EnviarDatosMedicos) ce, msg);
+                    }
+                } catch (jade.content.lang.Codec.CodecException e) {
+                    System.out.println("[AYUDANTE] Error de codec al procesar mensaje de " + sender);
+                    System.out.println("[AYUDANTE] Contenido problematico: " + msg.getContent());
+                    System.out.println("[AYUDANTE] Error: " + e.getMessage());
                 }
             } else if (performative == ACLMessage.CANCEL) {
                 // Cita cancelada

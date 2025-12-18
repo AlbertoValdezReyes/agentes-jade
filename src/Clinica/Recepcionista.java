@@ -197,20 +197,36 @@ public class Recepcionista extends Agent {
         private void procesarMensaje(ACLMessage msg) throws Exception {
             String sender = msg.getSender().getLocalName();
 
+            // Ignorar mensajes de agentes del sistema JADE
+            if (sender.equals("ams") || sender.equals("df") || sender.startsWith("rma")) {
+                return;
+            }
+
             // Intentar extraer contenido estructurado
             if (msg.getLanguage() != null && msg.getLanguage().equals(codec.getName())) {
-                ContentElement ce = getContentManager().extractContent(msg);
+                // Debug: mostrar contenido del mensaje
+                System.out.println("[RECEPCIONISTA] Mensaje de " + sender + " - Contenido: " + msg.getContent());
 
-                if (ce instanceof ConfirmarCita) {
-                    procesarConfirmacionCita((ConfirmarCita) ce, sender);
-                } else if (ce instanceof SolicitarDatos) {
-                    procesarSolicitudDatos((SolicitarDatos) ce, sender);
-                } else if (ce instanceof ConsultarSintomas) {
-                    procesarConsultaSintomas((ConsultarSintomas) ce, sender);
-                } else if (ce instanceof EnviarDiagnostico) {
-                    procesarDiagnostico((EnviarDiagnostico) ce, sender);
-                } else {
-                    // Mensaje no reconocido, mostrar contenido
+                try {
+                    ContentElement ce = getContentManager().extractContent(msg);
+
+                    if (ce instanceof ConfirmarCita) {
+                        procesarConfirmacionCita((ConfirmarCita) ce, sender);
+                    } else if (ce instanceof SolicitarDatos) {
+                        procesarSolicitudDatos((SolicitarDatos) ce, sender);
+                    } else if (ce instanceof ConsultarSintomas) {
+                        procesarConsultaSintomas((ConsultarSintomas) ce, sender);
+                    } else if (ce instanceof EnviarDiagnostico) {
+                        procesarDiagnostico((EnviarDiagnostico) ce, sender);
+                    } else {
+                        // Mensaje no reconocido, mostrar contenido
+                        procesarMensajeSimple(msg);
+                    }
+                } catch (jade.content.lang.Codec.CodecException e) {
+                    System.out.println("[RECEPCIONISTA] Error de codec al procesar mensaje de " + sender);
+                    System.out.println("[RECEPCIONISTA] Contenido problematico: " + msg.getContent());
+                    System.out.println("[RECEPCIONISTA] Error: " + e.getMessage());
+                    // Intentar procesar como mensaje simple
                     procesarMensajeSimple(msg);
                 }
             } else {

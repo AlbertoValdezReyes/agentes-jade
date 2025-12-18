@@ -57,20 +57,35 @@ public class Fisioterapeuta extends Agent {
 
         private void procesarMensaje(ACLMessage msg) throws Exception {
             int performative = msg.getPerformative();
+            String sender = msg.getSender().getLocalName();
+
+            // Ignorar mensajes de agentes del sistema JADE
+            if (sender.equals("ams") || sender.equals("df") || sender.startsWith("rma")) {
+                return;
+            }
 
             // Verificar si tiene contenido estructurado
             if (msg.getLanguage() != null && msg.getLanguage().equals(codec.getName())) {
-                ContentElement ce = getContentManager().extractContent(msg);
+                // Debug: mostrar contenido del mensaje
+                System.out.println("[FISIOTERAPEUTA] Mensaje de " + sender + " - Contenido: " + msg.getContent());
 
-                if (ce instanceof Agendar) {
-                    procesarSolicitudCita((Agendar) ce, msg);
-                } else if (ce instanceof EnviarSintomas) {
-                    procesarSintomas((EnviarSintomas) ce, msg);
-                } else if (ce instanceof CancelarCita) {
-                    procesarCancelacion((CancelarCita) ce, msg);
-                } else if (ce instanceof EnviarDatosMedicos) {
-                    // Datos medicos recibidos del Ayudante
-                    procesarDatosDelAyudante((EnviarDatosMedicos) ce, msg);
+                try {
+                    ContentElement ce = getContentManager().extractContent(msg);
+
+                    if (ce instanceof Agendar) {
+                        procesarSolicitudCita((Agendar) ce, msg);
+                    } else if (ce instanceof EnviarSintomas) {
+                        procesarSintomas((EnviarSintomas) ce, msg);
+                    } else if (ce instanceof CancelarCita) {
+                        procesarCancelacion((CancelarCita) ce, msg);
+                    } else if (ce instanceof EnviarDatosMedicos) {
+                        // Datos medicos recibidos del Ayudante
+                        procesarDatosDelAyudante((EnviarDatosMedicos) ce, msg);
+                    }
+                } catch (jade.content.lang.Codec.CodecException e) {
+                    System.out.println("[FISIOTERAPEUTA] Error de codec al procesar mensaje de " + sender);
+                    System.out.println("[FISIOTERAPEUTA] Contenido problematico: " + msg.getContent());
+                    System.out.println("[FISIOTERAPEUTA] Error: " + e.getMessage());
                 }
             } else if (performative == ACLMessage.CANCEL) {
                 // Mensaje de cancelacion sin contenido estructurado
