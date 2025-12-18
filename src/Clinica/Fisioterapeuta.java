@@ -1,5 +1,7 @@
 package Clinica;
 
+import Clinica.ui.ClinicaServidorApp;
+import Clinica.ui.GUIBridgeServidor;
 import jade.core.*;
 import jade.core.behaviours.*;
 import jade.lang.acl.*;
@@ -8,6 +10,7 @@ import jade.content.lang.*;
 import jade.content.lang.sl.*;
 import jade.content.onto.*;
 import jade.content.onto.basic.Action;
+import javafx.application.Platform;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,6 +22,7 @@ public class Fisioterapeuta extends Agent {
 
     private Codec codec = new SLCodec();
     private Ontology ontologia = ClinicaOntology.getInstance();
+    private GUIBridgeServidor guiBridge;
 
     // Almacen de citas activas
     private Map<String, Cita> citasActivas = new HashMap<>();
@@ -30,6 +34,24 @@ public class Fisioterapeuta extends Agent {
         getContentManager().registerOntology(ontologia);
 
         System.out.println("[FISIOTERAPEUTA] Listo y esperando citas...");
+
+        // Obtener referencia al bridge del servidor
+        guiBridge = GUIBridgeServidor.getInstance();
+
+        // Iniciar la interfaz JavaFX del servidor en un hilo separado
+        new Thread(() -> {
+            ClinicaServidorApp.launch(ClinicaServidorApp.class);
+        }).start();
+
+        // Esperar a que la GUI este lista
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
+        guiBridge.logFisioterapeuta("Agente Fisioterapeuta iniciado y listo");
+        guiBridge.actualizarEstado("Listo");
 
         // Comportamiento para gestionar mensajes entrantes
         addBehaviour(new GestionarMensajesBehaviour());
@@ -111,6 +133,13 @@ public class Fisioterapeuta extends Agent {
             System.out.println("  - Hora: " + cita.getHora());
             System.out.println("  - Terapia: " + cita.getTipoTerapia());
 
+            // Log en GUI
+            guiBridge.logFisioterapeuta("Nueva solicitud de cita recibida");
+            guiBridge.logFisioterapeuta("Paciente: " + cita.getNombrePaciente() + " - Hora: " + cita.getHora());
+            guiBridge.logFisioterapeuta("Terapia: " + cita.getTipoTerapia());
+            guiBridge.actualizarCita(cita);
+            guiBridge.actualizarEstado("Procesando cita");
+
             // Almacenar la cita
             cita.setEstado(Cita.ESTADO_CONFIRMADA);
             citasActivas.put(idCita, cita);
@@ -118,6 +147,8 @@ public class Fisioterapeuta extends Agent {
             // Confirmar la cita al Recepcionista
             enviarConfirmacion(msg, idCita, true,
                 "Su cita para " + cita.getTipoTerapia() + " ha sido agendada para las " + cita.getHora());
+
+            guiBridge.logFisioterapeuta("Cita confirmada - Notificando al Ayudante");
 
             // Notificar al Ayudante para que prepare la sala y solicite datos
             notificarAyudante(cita);
@@ -132,16 +163,28 @@ public class Fisioterapeuta extends Agent {
             System.out.println("  - Nivel de dolor: " + consulta.getNivelDolor() + "/10");
             System.out.println("  - Descripcion: " + consulta.getDescripcionSintomas());
 
+            // Log en GUI
+            guiBridge.logFisioterapeuta("Sintomas recibidos para cita " + idCita);
+            guiBridge.logFisioterapeuta("Zona: " + consulta.getZonaDolor() + " - Dolor: " + consulta.getNivelDolor() + "/10");
+            guiBridge.actualizarEstado("Generando diagnostico");
+
             // Obtener datos del paciente
             Paciente paciente = datosPacientes.get(idCita);
             Cita cita = citasActivas.get(idCita);
 
             // Generar diagnostico basado en sintomas y datos del paciente
+            guiBridge.logFisioterapeuta("Analizando sintomas y generando diagnostico...");
             Consulta diagnostico = generarDiagnostico(consulta, paciente, cita);
+
+            // Mostrar diagnostico en GUI
+            guiBridge.mostrarDiagnostico(diagnostico, idCita);
+            guiBridge.logFisioterapeuta("Diagnostico generado: " + diagnostico.getSesionesRecomendadas() + " sesiones recomendadas");
 
             // Enviar diagnostico al Recepcionista
             enviarDiagnostico(msg, idCita, diagnostico);
 
+            guiBridge.logFisioterapeuta("Diagnostico enviado al paciente");
+            guiBridge.actualizarEstado("Consulta completada");
             System.out.println("[FISIOTERAPEUTA] Diagnostico enviado al paciente");
         }
 
@@ -151,8 +194,15 @@ public class Fisioterapeuta extends Agent {
 
             System.out.println("\n[FISIOTERAPEUTA] Datos del paciente recibidos del Ayudante");
 
+            // Log en GUI
+            guiBridge.logFisioterapeuta("Datos del paciente recibidos del Ayudante");
+            guiBridge.actualizarPaciente(paciente, idCita);
+            guiBridge.actualizarEstado("Esperando sintomas");
+
             // Almacenar datos del paciente
             datosPacientes.put(idCita, paciente);
+
+            guiBridge.logFisioterapeuta("Solicitando sintomas al paciente...");
 
             // Solicitar sintomas al paciente
             solicitarSintomas(idCita, paciente);
@@ -162,6 +212,7 @@ public class Fisioterapeuta extends Agent {
             String idCita = cancelar.getIdCita();
 
             System.out.println("\n[FISIOTERAPEUTA] Solicitud de cancelacion para cita " + idCita);
+            guiBridge.logFisioterapeuta("Solicitud de cancelacion recibida para cita " + idCita);
 
             if (citasActivas.containsKey(idCita)) {
                 Cita cita = citasActivas.get(idCita);
@@ -175,8 +226,12 @@ public class Fisioterapeuta extends Agent {
                 // Notificar al Ayudante
                 notificarCancelacionAyudante(idCita);
 
+                guiBridge.logFisioterapeuta("Cita " + idCita + " cancelada exitosamente");
+                guiBridge.limpiarInfo();
+                guiBridge.actualizarEstado("Listo");
                 System.out.println("[FISIOTERAPEUTA] Cita cancelada");
             } else {
+                guiBridge.logFisioterapeuta("Error: No se encontro la cita " + idCita);
                 enviarConfirmacion(msg, idCita, false, "No se encontro la cita especificada.");
             }
         }

@@ -1,5 +1,6 @@
 package Clinica;
 
+import Clinica.ui.GUIBridgeServidor;
 import jade.core.Agent;
 import jade.core.AID;
 import jade.core.behaviours.CyclicBehaviour;
@@ -20,6 +21,7 @@ public class Ayudante extends Agent {
 
     private Codec codec = new SLCodec();
     private Ontology ontologia = ClinicaOntology.getInstance();
+    private GUIBridgeServidor guiBridge;
 
     // Almacen de citas pendientes de datos medicos
     private Map<String, Cita> citasPendientes = new HashMap<>();
@@ -29,7 +31,11 @@ public class Ayudante extends Agent {
         getContentManager().registerLanguage(codec);
         getContentManager().registerOntology(ontologia);
 
+        // Obtener referencia al bridge del servidor (ya iniciado por Fisioterapeuta)
+        guiBridge = GUIBridgeServidor.getInstance();
+
         System.out.println("[AYUDANTE] Listo para preparar salas y recopilar datos.");
+        guiBridge.logAyudante("Agente Ayudante iniciado y listo");
 
         addBehaviour(new GestionarTareasBehaviour());
     }
@@ -110,6 +116,11 @@ public class Ayudante extends Agent {
             System.out.println("  - Paciente: " + cita.getNombrePaciente());
             System.out.println("  - Terapia: " + cita.getTipoTerapia());
 
+            // Log en GUI
+            guiBridge.logAyudante("Preparando sala para nueva cita");
+            guiBridge.logAyudante("Paciente: " + cita.getNombrePaciente());
+            guiBridge.logAyudante("Terapia: " + cita.getTipoTerapia());
+
             // Simular preparacion de sala
             prepararSala(cita.getTipoTerapia());
 
@@ -119,6 +130,7 @@ public class Ayudante extends Agent {
             // Solicitar datos medicos al Recepcionista
             solicitarDatosMedicos(idCita);
 
+            guiBridge.logAyudante("Solicitud de datos medicos enviada al Recepcionista");
             System.out.println("[AYUDANTE] Solicitud de datos medicos enviada");
         }
 
@@ -133,12 +145,19 @@ public class Ayudante extends Agent {
             System.out.println("  - Diabetes: " + (paciente.isDiabetes() ? "Si" : "No"));
             System.out.println("  - Alergias: " + paciente.getAlergias());
 
+            // Log en GUI
+            guiBridge.logAyudante("Datos medicos recibidos para cita " + idCita);
+            guiBridge.logAyudante("Altura: " + paciente.getAltura() + "m - Peso: " + paciente.getPeso() + "kg");
+            guiBridge.logAyudante("IMC: " + String.format("%.1f", paciente.calcularIMC()));
+
             // Verificar IMC y dar advertencias si es necesario
             double imc = paciente.calcularIMC();
             if (imc > 30) {
                 System.out.println("[AYUDANTE] NOTA: Paciente con obesidad (IMC > 30). Informar al Fisioterapeuta.");
+                guiBridge.logAyudante("ALERTA: Paciente con obesidad (IMC > 30)");
             } else if (imc < 18.5) {
                 System.out.println("[AYUDANTE] NOTA: Paciente con bajo peso (IMC < 18.5). Informar al Fisioterapeuta.");
+                guiBridge.logAyudante("ALERTA: Paciente con bajo peso (IMC < 18.5)");
             }
 
             // Actualizar la cita con los datos del paciente
@@ -149,11 +168,13 @@ public class Ayudante extends Agent {
             }
 
             // Enviar datos al Fisioterapeuta para que continue con la consulta
+            guiBridge.logAyudante("Enviando datos al Fisioterapeuta...");
             notificarFisioterapeuta(idCita, paciente);
 
             // Remover de pendientes
             citasPendientes.remove(idCita);
 
+            guiBridge.logAyudante("Expediente completo. Datos enviados al Fisioterapeuta.");
             System.out.println("[AYUDANTE] Datos enviados al Fisioterapeuta. Expediente completo.");
         }
     }
@@ -161,45 +182,54 @@ public class Ayudante extends Agent {
     // Simular la preparacion de la sala segun el tipo de terapia
     private void prepararSala(String tipoTerapia) {
         System.out.println("[AYUDANTE] Iniciando preparacion de sala...");
+        guiBridge.logAyudante("Iniciando preparacion de sala...");
 
         switch (tipoTerapia) {
             case "Masaje Terapeutico":
                 System.out.println("  -> Preparando camilla de masajes");
                 System.out.println("  -> Calentando aceites terapeuticos");
                 System.out.println("  -> Ajustando iluminacion tenue");
+                guiBridge.logAyudante("Preparando camilla y aceites terapeuticos");
                 break;
             case "Rehabilitacion Fisica":
                 System.out.println("  -> Preparando equipo de ejercicios");
                 System.out.println("  -> Verificando bandas elasticas y pesas");
                 System.out.println("  -> Despejando area de ejercicio");
+                guiBridge.logAyudante("Preparando equipo de ejercicios");
                 break;
             case "Electroterapia":
                 System.out.println("  -> Encendiendo equipo TENS");
                 System.out.println("  -> Preparando ultrasonido terapeutico");
                 System.out.println("  -> Verificando electrodos y gel conductor");
+                guiBridge.logAyudante("Encendiendo equipo TENS y ultrasonido");
                 break;
             case "Hidroterapia":
                 System.out.println("  -> Verificando temperatura de la piscina (34-36C)");
                 System.out.println("  -> Preparando flotadores y accesorios");
                 System.out.println("  -> Comprobando niveles de cloro");
+                guiBridge.logAyudante("Verificando piscina y accesorios");
                 break;
             case "Terapia Manual":
                 System.out.println("  -> Preparando camilla articulada");
                 System.out.println("  -> Disponiendo toallas limpias");
                 System.out.println("  -> Verificando espacio para movilizaciones");
+                guiBridge.logAyudante("Preparando camilla articulada");
                 break;
             case "Ejercicios Terapeuticos":
                 System.out.println("  -> Preparando colchonetas");
                 System.out.println("  -> Disponiendo pelotas de estabilidad");
                 System.out.println("  -> Verificando espacio libre para ejercicios");
+                guiBridge.logAyudante("Preparando colchonetas y pelotas");
                 break;
             default:
                 System.out.println("  -> Preparando sala general");
                 System.out.println("  -> Desinfectando superficies");
+                guiBridge.logAyudante("Preparando sala general");
         }
 
         System.out.println("  -> Desinfectando area de trabajo");
         System.out.println("  -> Sala lista para el paciente");
+        guiBridge.logAyudante("Sala desinfectada y lista para el paciente");
     }
 
     // Solicitar datos medicos al Recepcionista
