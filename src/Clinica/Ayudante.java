@@ -8,6 +8,7 @@ import jade.content.*;
 import jade.content.lang.*;
 import jade.content.lang.sl.*;
 import jade.content.onto.*;
+import jade.content.onto.basic.Action;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -71,12 +72,20 @@ public class Ayudante extends Agent {
                 try {
                     ContentElement ce = getContentManager().extractContent(msg);
 
-                    if (ce instanceof Agendar) {
+                    // Extraer la accion del wrapper Action si es necesario
+                    Concept accion = null;
+                    if (ce instanceof Action) {
+                        accion = ((Action) ce).getAction();
+                    } else if (ce instanceof Concept) {
+                        accion = (Concept) ce;
+                    }
+
+                    if (accion instanceof Agendar) {
                         // Recibe instruccion del Fisioterapeuta para preparar sala
-                        procesarNuevaCita((Agendar) ce, msg);
-                    } else if (ce instanceof EnviarDatosMedicos) {
+                        procesarNuevaCita((Agendar) accion, msg);
+                    } else if (accion instanceof EnviarDatosMedicos) {
                         // Recibe datos medicos del Recepcionista
-                        procesarDatosMedicos((EnviarDatosMedicos) ce, msg);
+                        procesarDatosMedicos((EnviarDatosMedicos) accion, msg);
                     }
                 } catch (jade.content.lang.Codec.CodecException e) {
                     System.out.println("[AYUDANTE] Error de codec al procesar mensaje de " + sender);
@@ -200,11 +209,14 @@ public class Ayudante extends Agent {
             solicitar.setIdCita(idCita);
 
             ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
-            msg.addReceiver(new AID("Recepcionista", AID.ISLOCALNAME));
+            AID recepcionista = new AID("Recepcionista", AID.ISLOCALNAME);
+            msg.addReceiver(recepcionista);
             msg.setLanguage(codec.getName());
             msg.setOntology(ontologia.getName());
 
-            getContentManager().fillContent(msg, solicitar);
+            // Envolver la accion en un objeto Action
+            Action actionWrapper = new Action(recepcionista, solicitar);
+            getContentManager().fillContent(msg, actionWrapper);
             send(msg);
 
         } catch (Exception e) {
@@ -221,11 +233,14 @@ public class Ayudante extends Agent {
             enviar.setPaciente(paciente);
 
             ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
-            msg.addReceiver(new AID("Fisioterapeuta", AID.ISLOCALNAME));
+            AID fisioterapeuta = new AID("Fisioterapeuta", AID.ISLOCALNAME);
+            msg.addReceiver(fisioterapeuta);
             msg.setLanguage(codec.getName());
             msg.setOntology(ontologia.getName());
 
-            getContentManager().fillContent(msg, enviar);
+            // Envolver la accion en un objeto Action
+            Action actionWrapper = new Action(fisioterapeuta, enviar);
+            getContentManager().fillContent(msg, actionWrapper);
             send(msg);
 
         } catch (Exception e) {

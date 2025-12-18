@@ -9,6 +9,7 @@ import jade.content.*;
 import jade.content.lang.*;
 import jade.content.lang.sl.*;
 import jade.content.onto.*;
+import jade.content.onto.basic.Action;
 import javafx.application.Platform;
 
 /**
@@ -77,12 +78,14 @@ public class Recepcionista extends Agent {
 
             // Crear mensaje ACL
             ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
-            msg.addReceiver(new AID("Fisioterapeuta", AID.ISLOCALNAME));
+            AID fisioterapeuta = new AID("Fisioterapeuta", AID.ISLOCALNAME);
+            msg.addReceiver(fisioterapeuta);
             msg.setLanguage(codec.getName());
             msg.setOntology(ontologia.getName());
 
-            // Llenar contenido
-            getContentManager().fillContent(msg, accion);
+            // Envolver la accion en un objeto Action (requerido por SL)
+            Action actionWrapper = new Action(fisioterapeuta, accion);
+            getContentManager().fillContent(msg, actionWrapper);
             send(msg);
 
             esperandoRespuesta = true;
@@ -103,11 +106,14 @@ public class Recepcionista extends Agent {
             accion.setIdCita(idCita);
 
             ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
-            msg.addReceiver(new AID("Ayudante", AID.ISLOCALNAME));
+            AID ayudante = new AID("Ayudante", AID.ISLOCALNAME);
+            msg.addReceiver(ayudante);
             msg.setLanguage(codec.getName());
             msg.setOntology(ontologia.getName());
 
-            getContentManager().fillContent(msg, accion);
+            // Envolver la accion en un objeto Action
+            Action actionWrapper = new Action(ayudante, accion);
+            getContentManager().fillContent(msg, actionWrapper);
             send(msg);
 
             System.out.println("[RECEPCIONISTA] Datos medicos enviados al Ayudante");
@@ -126,11 +132,14 @@ public class Recepcionista extends Agent {
             accion.setIdCita(idCita);
 
             ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
-            msg.addReceiver(new AID("Fisioterapeuta", AID.ISLOCALNAME));
+            AID fisioterapeuta = new AID("Fisioterapeuta", AID.ISLOCALNAME);
+            msg.addReceiver(fisioterapeuta);
             msg.setLanguage(codec.getName());
             msg.setOntology(ontologia.getName());
 
-            getContentManager().fillContent(msg, accion);
+            // Envolver la accion en un objeto Action
+            Action actionWrapper = new Action(fisioterapeuta, accion);
+            getContentManager().fillContent(msg, actionWrapper);
             send(msg);
 
             guiBridge.actualizarEstado("Esperando diagnostico...");
@@ -152,11 +161,14 @@ public class Recepcionista extends Agent {
             accion.setMotivo("Cancelado por el usuario");
 
             ACLMessage msg = new ACLMessage(ACLMessage.CANCEL);
-            msg.addReceiver(new AID("Fisioterapeuta", AID.ISLOCALNAME));
+            AID fisioterapeuta = new AID("Fisioterapeuta", AID.ISLOCALNAME);
+            msg.addReceiver(fisioterapeuta);
             msg.setLanguage(codec.getName());
             msg.setOntology(ontologia.getName());
 
-            getContentManager().fillContent(msg, accion);
+            // Envolver la accion en un objeto Action
+            Action actionWrapper = new Action(fisioterapeuta, accion);
+            getContentManager().fillContent(msg, actionWrapper);
             send(msg);
 
             System.out.println("[RECEPCIONISTA] Solicitud de cancelacion enviada");
@@ -210,14 +222,22 @@ public class Recepcionista extends Agent {
                 try {
                     ContentElement ce = getContentManager().extractContent(msg);
 
-                    if (ce instanceof ConfirmarCita) {
-                        procesarConfirmacionCita((ConfirmarCita) ce, sender);
-                    } else if (ce instanceof SolicitarDatos) {
-                        procesarSolicitudDatos((SolicitarDatos) ce, sender);
-                    } else if (ce instanceof ConsultarSintomas) {
-                        procesarConsultaSintomas((ConsultarSintomas) ce, sender);
-                    } else if (ce instanceof EnviarDiagnostico) {
-                        procesarDiagnostico((EnviarDiagnostico) ce, sender);
+                    // Extraer la accion del wrapper Action si es necesario
+                    Concept accion = null;
+                    if (ce instanceof Action) {
+                        accion = ((Action) ce).getAction();
+                    } else if (ce instanceof Concept) {
+                        accion = (Concept) ce;
+                    }
+
+                    if (accion instanceof ConfirmarCita) {
+                        procesarConfirmacionCita((ConfirmarCita) accion, sender);
+                    } else if (accion instanceof SolicitarDatos) {
+                        procesarSolicitudDatos((SolicitarDatos) accion, sender);
+                    } else if (accion instanceof ConsultarSintomas) {
+                        procesarConsultaSintomas((ConsultarSintomas) accion, sender);
+                    } else if (accion instanceof EnviarDiagnostico) {
+                        procesarDiagnostico((EnviarDiagnostico) accion, sender);
                     } else {
                         // Mensaje no reconocido, mostrar contenido
                         procesarMensajeSimple(msg);

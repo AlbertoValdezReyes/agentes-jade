@@ -7,6 +7,7 @@ import jade.content.*;
 import jade.content.lang.*;
 import jade.content.lang.sl.*;
 import jade.content.onto.*;
+import jade.content.onto.basic.Action;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -72,15 +73,23 @@ public class Fisioterapeuta extends Agent {
                 try {
                     ContentElement ce = getContentManager().extractContent(msg);
 
-                    if (ce instanceof Agendar) {
-                        procesarSolicitudCita((Agendar) ce, msg);
-                    } else if (ce instanceof EnviarSintomas) {
-                        procesarSintomas((EnviarSintomas) ce, msg);
-                    } else if (ce instanceof CancelarCita) {
-                        procesarCancelacion((CancelarCita) ce, msg);
-                    } else if (ce instanceof EnviarDatosMedicos) {
+                    // Extraer la accion del wrapper Action si es necesario
+                    Concept accion = null;
+                    if (ce instanceof Action) {
+                        accion = ((Action) ce).getAction();
+                    } else if (ce instanceof Concept) {
+                        accion = (Concept) ce;
+                    }
+
+                    if (accion instanceof Agendar) {
+                        procesarSolicitudCita((Agendar) accion, msg);
+                    } else if (accion instanceof EnviarSintomas) {
+                        procesarSintomas((EnviarSintomas) accion, msg);
+                    } else if (accion instanceof CancelarCita) {
+                        procesarCancelacion((CancelarCita) accion, msg);
+                    } else if (accion instanceof EnviarDatosMedicos) {
                         // Datos medicos recibidos del Ayudante
-                        procesarDatosDelAyudante((EnviarDatosMedicos) ce, msg);
+                        procesarDatosDelAyudante((EnviarDatosMedicos) accion, msg);
                     }
                 } catch (jade.content.lang.Codec.CodecException e) {
                     System.out.println("[FISIOTERAPEUTA] Error de codec al procesar mensaje de " + sender);
@@ -186,7 +195,9 @@ public class Fisioterapeuta extends Agent {
             reply.setLanguage(codec.getName());
             reply.setOntology(ontologia.getName());
 
-            getContentManager().fillContent(reply, confirmacion);
+            // Envolver la accion en un objeto Action
+            Action actionWrapper = new Action(getAID(), confirmacion);
+            getContentManager().fillContent(reply, actionWrapper);
             send(reply);
 
         } catch (Exception e) {
@@ -198,7 +209,8 @@ public class Fisioterapeuta extends Agent {
     private void notificarAyudante(Cita cita) {
         try {
             ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
-            msg.addReceiver(new AID("Ayudante", AID.ISLOCALNAME));
+            AID ayudante = new AID("Ayudante", AID.ISLOCALNAME);
+            msg.addReceiver(ayudante);
             msg.setLanguage(codec.getName());
             msg.setOntology(ontologia.getName());
 
@@ -206,7 +218,9 @@ public class Fisioterapeuta extends Agent {
             Agendar agendar = new Agendar();
             agendar.setCita(cita);
 
-            getContentManager().fillContent(msg, agendar);
+            // Envolver la accion en un objeto Action
+            Action actionWrapper = new Action(ayudante, agendar);
+            getContentManager().fillContent(msg, actionWrapper);
             send(msg);
 
             System.out.println("[FISIOTERAPEUTA] Ayudante notificado para preparar sala");
@@ -252,11 +266,14 @@ public class Fisioterapeuta extends Agent {
             consultar.setPaciente(paciente);
 
             ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
-            msg.addReceiver(new AID("Recepcionista", AID.ISLOCALNAME));
+            AID recepcionista = new AID("Recepcionista", AID.ISLOCALNAME);
+            msg.addReceiver(recepcionista);
             msg.setLanguage(codec.getName());
             msg.setOntology(ontologia.getName());
 
-            getContentManager().fillContent(msg, consultar);
+            // Envolver la accion en un objeto Action
+            Action actionWrapper = new Action(recepcionista, consultar);
+            getContentManager().fillContent(msg, actionWrapper);
             send(msg);
 
             System.out.println("[FISIOTERAPEUTA] Solicitud de sintomas enviada al Recepcionista");
@@ -278,7 +295,9 @@ public class Fisioterapeuta extends Agent {
             reply.setLanguage(codec.getName());
             reply.setOntology(ontologia.getName());
 
-            getContentManager().fillContent(reply, enviar);
+            // Envolver la accion en un objeto Action
+            Action actionWrapper = new Action(getAID(), enviar);
+            getContentManager().fillContent(reply, actionWrapper);
             send(reply);
 
         } catch (Exception e) {
