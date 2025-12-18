@@ -47,6 +47,10 @@ public class Pago implements Concept {
         return pagado;
     }
 
+    public boolean getPagado() {
+        return pagado;
+    }
+
     public void setPagado(boolean pagado) {
         this.pagado = pagado;
     }
