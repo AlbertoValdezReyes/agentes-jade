@@ -56,7 +56,7 @@ public class Recepcionista extends Agent {
                 accion.setCita(c);
 
                 // Crear Mensaje ACL
-                ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
+                ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
                 // Asumimos que el fisioterapeuta se llama "Fisioterapeuta"
                 msg.addReceiver(new AID("Fisioterapeuta", AID.ISLOCALNAME)); 
                 msg.setLanguage(codec.getName());
