@@ -1,0 +1,367 @@
+/*
+ * Estilos CSS para la Clinica de Fisioterapia
+ * Diseno moderno e interactivo
+ */
+
+/* === CONTENEDOR PRINCIPAL === */
+.root-container {
+    -fx-background-color: #f5f7fa;
+}
+
+/* === HEADER === */
+.header {
+    -fx-background-color: linear-gradient(to right, #2196F3, #1976D2);
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 2);
+}
+
+.estado-label {
+    -fx-background-color: #4CAF50;
+    -fx-text-fill: white;
+    -fx-padding: 5 15 5 15;
+    -fx-background-radius: 15;
+    -fx-font-weight: bold;
+}
+
+/* === AREA DE CONTENIDO === */
+.content-area {
+    -fx-background-color: #f5f7fa;
+}
+
+/* === PANEL DE CHAT === */
+.chat-panel {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);
+    -fx-padding: 15;
+}
+
+.panel-title {
+    -fx-text-fill: #333;
+    -fx-padding: 0 0 10 0;
+}
+
+.chat-scroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+}
+
+.chat-scroll .viewport {
+    -fx-background-color: transparent;
+}
+
+.chat-container {
+    -fx-background-color: #fafafa;
+    -fx-background-radius: 8;
+}
+
+/* === BURBUJAS DE MENSAJE === */
+.mensaje-burbuja {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-padding: 10 15 10 15;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 1);
+}
+
+.mensaje-recepcionista {
+    -fx-background-color: #E3F2FD;
+    -fx-border-color: #2196F3;
+    -fx-border-width: 0 3 0 0;
+    -fx-border-radius: 12;
+}
+
+.mensaje-fisioterapeuta {
+    -fx-background-color: #E8F5E9;
+    -fx-border-color: #4CAF50;
+    -fx-border-width: 0 0 0 3;
+    -fx-border-radius: 12;
+}
+
+.mensaje-ayudante {
+    -fx-background-color: #FFF3E0;
+    -fx-border-color: #FF9800;
+    -fx-border-width: 0 0 0 3;
+    -fx-border-radius: 12;
+}
+
+.mensaje-sistema {
+    -fx-background-color: #ECEFF1;
+    -fx-border-color: #9E9E9E;
+    -fx-border-width: 0 0 2 0;
+    -fx-border-radius: 12;
+}
+
+.mensaje-tiempo {
+    -fx-text-fill: #9E9E9E;
+    -fx-font-size: 10px;
+}
+
+.mensaje-texto {
+    -fx-text-fill: #333;
+    -fx-font-size: 13px;
+}
+
+/* === PANEL DE FORMULARIOS === */
+.form-panel {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);
+    -fx-padding: 15;
+}
+
+.formulario-container {
+    -fx-background-color: #fafafa;
+    -fx-background-radius: 8;
+    -fx-padding: 10;
+}
+
+.mensaje-inicial {
+    -fx-text-fill: #757575;
+    -fx-font-size: 14px;
+    -fx-alignment: center;
+    -fx-padding: 50;
+}
+
+/* === FORMULARIOS === */
+.formulario-titulo {
+    -fx-text-fill: #1976D2;
+    -fx-padding: 0 0 10 0;
+}
+
+.formulario-subtitulo {
+    -fx-text-fill: #666;
+    -fx-font-size: 12px;
+    -fx-padding: 0 0 10 0;
+}
+
+.campo-label {
+    -fx-text-fill: #555;
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+}
+
+.campo-texto {
+    -fx-background-color: white;
+    -fx-border-color: #ddd;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+    -fx-padding: 8;
+    -fx-font-size: 13px;
+}
+
+.campo-texto:focused {
+    -fx-border-color: #2196F3;
+    -fx-effect: dropshadow(gaussian, rgba(33,150,243,0.3), 5, 0, 0, 0);
+}
+
+.campo-combo {
+    -fx-background-color: white;
+    -fx-border-color: #ddd;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+    -fx-padding: 5;
+}
+
+.campo-combo:focused {
+    -fx-border-color: #2196F3;
+}
+
+.campo-textarea {
+    -fx-background-color: white;
+    -fx-border-color: #ddd;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+    -fx-font-size: 13px;
+}
+
+.campo-textarea:focused {
+    -fx-border-color: #2196F3;
+}
+
+.radio-pago {
+    -fx-font-size: 13px;
+    -fx-text-fill: #333;
+}
+
+.radio-pago:selected {
+    -fx-text-fill: #1976D2;
+}
+
+.checkbox-medico {
+    -fx-font-size: 13px;
+    -fx-text-fill: #333;
+}
+
+.precio-label {
+    -fx-text-fill: #4CAF50;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-padding: 5 0 0 0;
+}
+
+.monto-label {
+    -fx-text-fill: #1976D2;
+}
+
+.nota-informativa {
+    -fx-text-fill: #9E9E9E;
+    -fx-font-size: 11px;
+    -fx-font-style: italic;
+    -fx-padding: 10 0 0 0;
+}
+
+.info-paciente {
+    -fx-background-color: #E3F2FD;
+    -fx-padding: 10;
+    -fx-background-radius: 5;
+    -fx-font-size: 11px;
+    -fx-text-fill: #1565C0;
+}
+
+/* === SLIDER DE DOLOR === */
+.slider-dolor {
+    -fx-padding: 10 0 5 0;
+}
+
+.slider-dolor .track {
+    -fx-background-color: linear-gradient(to right, #4CAF50, #FFC107, #F44336);
+    -fx-background-radius: 5;
+}
+
+.slider-dolor .thumb {
+    -fx-background-color: white;
+    -fx-border-color: #1976D2;
+    -fx-border-width: 2;
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 3, 0, 0, 1);
+}
+
+.nivel-dolor-label {
+    -fx-text-fill: #666;
+    -fx-font-size: 12px;
+    -fx-alignment: center;
+}
+
+/* === DIAGNOSTICO === */
+.diagnostico-panel {
+    -fx-background-color: #E8F5E9;
+    -fx-background-radius: 8;
+}
+
+.diagnostico-titulo {
+    -fx-text-fill: #2E7D32;
+    -fx-padding: 0 0 15 0;
+}
+
+.diagnostico-seccion-titulo {
+    -fx-text-fill: #1B5E20;
+}
+
+.diagnostico-seccion-contenido {
+    -fx-text-fill: #333;
+    -fx-padding: 0 0 10 10;
+}
+
+/* === BOTONES === */
+.btn {
+    -fx-padding: 10 25 10 25;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-background-radius: 5;
+    -fx-border-radius: 5;
+}
+
+.btn-primary {
+    -fx-background-color: #2196F3;
+    -fx-text-fill: white;
+}
+
+.btn-primary:hover {
+    -fx-background-color: #1976D2;
+    -fx-effect: dropshadow(gaussian, rgba(33,150,243,0.4), 8, 0, 0, 2);
+}
+
+.btn-primary:pressed {
+    -fx-background-color: #1565C0;
+}
+
+.btn-success {
+    -fx-background-color: #4CAF50;
+    -fx-text-fill: white;
+}
+
+.btn-success:hover {
+    -fx-background-color: #43A047;
+    -fx-effect: dropshadow(gaussian, rgba(76,175,80,0.4), 8, 0, 0, 2);
+}
+
+.btn-success:pressed {
+    -fx-background-color: #388E3C;
+}
+
+.btn-danger {
+    -fx-background-color: #f44336;
+    -fx-text-fill: white;
+}
+
+.btn-danger:hover {
+    -fx-background-color: #e53935;
+    -fx-effect: dropshadow(gaussian, rgba(244,67,54,0.4), 8, 0, 0, 2);
+}
+
+.btn-danger:pressed {
+    -fx-background-color: #d32f2f;
+}
+
+.btn:disabled {
+    -fx-background-color: #BDBDBD;
+    -fx-text-fill: #757575;
+    -fx-cursor: default;
+}
+
+/* === FOOTER === */
+.footer {
+    -fx-background-color: #ECEFF1;
+    -fx-border-color: #ddd;
+    -fx-border-width: 1 0 0 0;
+}
+
+/* === SCROLLBARS === */
+.scroll-pane > .viewport {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: #BDBDBD;
+    -fx-background-radius: 5;
+}
+
+.scroll-bar .thumb:hover {
+    -fx-background-color: #9E9E9E;
+}
+
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.scroll-bar .increment-arrow,
+.scroll-bar .decrement-arrow {
+    -fx-shape: "";
+    -fx-padding: 0;
+}
+
+/* === ALERTAS === */
+.alert {
+    -fx-background-color: white;
+}
+
+.alert .button {
+    -fx-background-color: #2196F3;
+    -fx-text-fill: white;
+}
