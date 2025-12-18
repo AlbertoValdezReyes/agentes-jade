@@ -2,7 +2,6 @@ package Clinica;
 
 import Clinica.ui.ClinicaClienteApp;
 import Clinica.ui.GUIBridge;
-import Clinica.ui.MensajeChat;
 import jade.core.*;
 import jade.core.behaviours.*;
 import jade.lang.acl.*;
@@ -224,8 +223,14 @@ public class Recepcionista extends Agent {
             String content = msg.getContent();
 
             if (content != null && !content.isEmpty()) {
-                MensajeChat.TipoAgente tipo = obtenerTipoAgente(sender);
-                guiBridge.agregarMensaje(content, MensajeChat.TipoAgente.SISTEMA);
+                // Determinar el tipo de agente y usar el metodo apropiado
+                if (sender.toLowerCase().contains("fisioterapeuta")) {
+                    guiBridge.agregarMensajeFisioterapeuta(content);
+                } else if (sender.toLowerCase().contains("ayudante")) {
+                    guiBridge.agregarMensajeAyudante(content);
+                } else {
+                    guiBridge.agregarMensajeSistema(content);
+                }
             }
         }
 
@@ -315,15 +320,6 @@ public class Recepcionista extends Agent {
             }
         }
 
-        private MensajeChat.TipoAgente obtenerTipoAgente(String nombre) {
-            if (nombre.toLowerCase().contains("fisioterapeuta")) {
-                return MensajeChat.TipoAgente.FISIOTERAPEUTA;
-            } else if (nombre.toLowerCase().contains("ayudante")) {
-                return MensajeChat.TipoAgente.AYUDANTE;
-            } else {
-                return MensajeChat.TipoAgente.SISTEMA;
-            }
-        }
     }
 
     @Override
